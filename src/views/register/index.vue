@@ -11,7 +11,7 @@
         :model="form"
         label-width="100px"
         :rules="rulesObj"
-        hide-required-asterisk="false"
+        :hide-required-asterisk="hideRequired"
       >
         <el-form-item label="账号:" prop="username">
           <el-input
@@ -49,6 +49,8 @@
   前端绑定数据对象属性名,可以直接跟要调用的功能接口的参数名一致
   好处:我可以把前端对象(带着同名的属性和前端的值)发给后台,触发简写
 */
+// 引入注册请求api
+import { registerAPI } from '@/api'
 export default {
   name: 'my-register',
   data () {
@@ -69,6 +71,7 @@ export default {
         password: '', // 密码
         rePassword: '' // 确认密码
       },
+      hideRequired: true, // 隐藏必填项的红色*
       // 表单规则校验对象,里面的规则名字和属性名字一样
       rulesObj: {
         username: [
@@ -93,9 +96,35 @@ export default {
   methods: {
     // 注册=>点击事件
     registerFn () {
-
+      // js兜底校验
+      this.$refs.form.validate(async valid => {
+        // valid是布尔值
+        if (valid) {
+          // 通过校验
+          console.log(this.form)
+          // registerAPI(this.form) // 返回一个promise对象
+          // 1.调用注册接口
+          // 解构赋值,把axios返回的数据对象data字段对应的值保存在res上
+          const { data: res } = await registerAPI(this.form)
+          console.log(res)
+          // 2.注册失败,提示用户
+          if (res.code !== 0) {
+            // elementUI在vue的原型链上添加了弹窗提示,$message属性
+            // return必须有,作用:阻止代码往下执行
+            return this.$message.error(res.message)
+          }
+          // 3.注册成功,提示用户
+          this.$message.success(res.message)
+          // 4.跳转到登录页面
+          this.$router.push('/login')
+        } else {
+          console.log('error')
+          return false // 阻止默认提交行为(表单下面红色提示会自动出现)
+        }
+      })
     }
   }
+
 }
 </script>
 
