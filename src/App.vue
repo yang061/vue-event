@@ -6,7 +6,6 @@
 </template>
 
 <script>
-// import { registerAPI } from './api'
 export default {
 
 }
@@ -15,5 +14,9 @@ export default {
 <style lang="less">
 div {
   height: 100%;
+}
+// 修改elementUI 中message组件的样式
+.myBox {
+  max-height: 50px !important;
 }
 </style>

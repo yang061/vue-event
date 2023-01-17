@@ -3,8 +3,7 @@
   <div class="reg-container">
     <!-- 注册的盒子 -->
     <div class="reg-box">
-      <!-- 标题的盒子 -->
-      <div class="title">{{ title }}</div>
+      <my-title />
       <!-- 注册的表单区域 -->
       <el-form
         ref="form"
@@ -37,7 +36,7 @@
           <el-button type="primary" @click="registerFn" class="btn-reg"
             >注册</el-button
           >
-          <el-link type="info">去登录</el-link>
+          <el-link type="info" @click="$router.push('/login')">去登录</el-link>
         </el-form-item>
       </el-form>
     </div>
@@ -49,10 +48,13 @@
   前端绑定数据对象属性名,可以直接跟要调用的功能接口的参数名一致
   好处:我可以把前端对象(带着同名的属性和前端的值)发给后台,触发简写
 */
+// 引入Title组件
+import myTitle from '@/components/Title.vue'
 // 引入注册请求api
 import { registerAPI } from '@/api'
 export default {
   name: 'my-register',
+  components: { myTitle },
   data () {
     // 定义校验函数,必须在data里面定义,以确保能够使用this.form
     const checkRePassword = (rule, value, callback) => {
@@ -65,7 +67,6 @@ export default {
       }
     }
     return {
-      title: '后台管理系统',
       form: { // 表单数据对象
         username: '', // 用户名
         password: '', // 密码
@@ -110,11 +111,21 @@ export default {
           // 2.注册失败,提示用户
           if (res.code !== 0) {
             // elementUI在vue的原型链上添加了弹窗提示,$message属性
-            // return必须有,作用:阻止代码往下执行
-            return this.$message.error(res.message)
+            // return没有{}必须有,作用:阻止代码往下执行
+            return this.$message({
+              // 自定义样式
+              type: 'error',
+              message: res.message,
+              customClass: 'myBox',
+            })
           }
           // 3.注册成功,提示用户
-          this.$message.success(res.message)
+          this.$message({
+            // 自定义样式
+            type: 'success',
+            message: res.message,
+            customClass: 'myBox',
+          })
           // 4.跳转到登录页面
           this.$router.push('/login')
         } else {
@@ -139,24 +150,14 @@ export default {
   .reg-box {
     background-color: #fff;
     border-radius: 5px;
-    width: 410px;
+    width: 450px;
     height: 320px;
     // 固定定位,实现居中效果
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    padding: 10px 20px;
-    .title {
-      height: 50px;
-      text-align: center;
-      line-height: 40px;
-      font-size: 20px;
-      font-weight: 700;
-      color: rgb(99, 181, 214);
-      // 改变字间距(左右)
-      letter-spacing: 2px;
-    }
+    padding: 15px 35px 10px 0;
 
     .btn-reg {
       // 修改注册按钮大小

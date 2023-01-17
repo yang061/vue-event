@@ -4,6 +4,11 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 const routes = [
   {
+    //打开默认看到布局页
+    path:'/' ,
+    component:()=>import('@/views/layout/index')
+  },
+  {
     // 注册的路由配置
     path: '/reg',
     /* webpack提供import函数来路由懒加载导入组件
