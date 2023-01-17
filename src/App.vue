@@ -1,18 +1,19 @@
 <template>
   <div>
-    <el-button>111</el-button>
+    <!-- 一级路由规则对象的挂载点 -->
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import { registerAPI } from './api'
+// import { registerAPI } from './api'
 export default {
-  async created () {
-    const res = await registerAPI()
-    console.log(res)
-  }
+
 }
 </script>
 
 <style lang="less">
+div {
+  height: 100%;
+}
 </style>
