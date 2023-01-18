@@ -30,15 +30,30 @@ const router = new VueRouter({
   routes
 })
 
+// 准备白名单
+const whiteList = ['/reg', '/login']
+
 // 全局前置路由守卫
 router.beforeEach((to, from, next) => {
   const token = store.state.token
-  if (token && !store.state.userInfo.username) {
-    // 本地有token,并且state里面的userInfo.username不为空，才去请求用户信息，避免重复请求
-    // 调用actions里方法请求数据
-    store.dispatch('getUserInfoAction')
+  if (token) {
+    // 登录了
+    if (!store.state.userInfo.username) {
+      // 本地有token,并且state里面的userInfo.username不为空，才去请求用户信息，避免重复请求
+      // 调用actions里方法请求数据
+      store.dispatch('getUserInfoAction')
+    }
+    next() //路由放行
+  } else {
+    // 未登录
+    if (whiteList.includes(to.path)) {
+      // 未登录，是白名单的路由地址，则放行(前置路由守卫不会再触发了，而是再去匹配路由表，让组件挂载)
+      next()
+    } else {
+      // 强制跳转登录页
+      next('/login')
+    }
   }
-  next() //路由放行
 })
 
 export default router
