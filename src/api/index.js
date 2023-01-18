@@ -1,7 +1,6 @@
 // 封装的是具体的接口方法
 // 注意，每个方法只负责一个url地址
 import request from '@/utils/request' // 引入自定义axios函数
-import store from '@/store' //引入store对象
 
 // 导出接口方法，为了在逻辑页面引入可以调用
 /* 函数形参的对象解构赋值方法
@@ -43,11 +42,11 @@ export const registerAPI = ({ username, password, rePassword }) => {
  * @param {*} param0 {username:用户名,password:密码} //传入的参数
  * @returns Promise对象
  */
-export const loginAPI =({username,password})=>{
+export const loginAPI = ({ username, password }) => {
   return request({
-    url:'/api/login',
-    method:'post',
-    data:{
+    url: '/api/login',
+    method: 'post',
+    data: {
       username,
       password
     },
@@ -59,15 +58,21 @@ export const loginAPI =({username,password})=>{
  * @param {*} param0 Authorization
  * @returns Promise对象
  */
-export const getUserInfoAPI = (()=>{
+export const getUserInfoAPI = (() => {
   return request({
-    url:'/my/userinfo',
+    url: '/my/userinfo',
     // method不写默认为get
-    method:'get',
+    method: 'get',
     // 传参给后台：params（查询字符串query），data（请求体body),headers(请求头)
-    headers:{
-      // this.$store.state.token 这里this不是组件对象，不能用this.$store拿到store对象
-      Authorization:store.state.token
-    }
+  })
+})
+
+/**
+ * 获取侧边栏数据
+ * @returns Promise对象
+ */
+export const getMenuAPI = (() => {
+  return request({
+    url: '/my/menus',
   })
 })

@@ -35,9 +35,10 @@ router.beforeEach((to, from, next) => {
   const token = store.state.token
   if (token && !store.state.userInfo.username) {
     // 本地有token,并且state里面的userInfo.username不为空，才去请求用户信息，避免重复请求
+    // 调用actions里方法请求数据
     store.dispatch('getUserInfoAction')
   }
-  next()
+  next() //路由放行
 })
 
 export default router
