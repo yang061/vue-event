@@ -1,6 +1,7 @@
 // 封装的是具体的接口方法
 // 注意，每个方法只负责一个url地址
 import request from '@/utils/request' // 引入自定义axios函数
+import store from '@/store' //引入store对象
 
 // 导出接口方法，为了在逻辑页面引入可以调用
 /* 函数形参的对象解构赋值方法
@@ -14,6 +15,11 @@ import request from '@/utils/request' // 引入自定义axios函数
  左侧想用对象的解构赋值(语法)
  ES6规定,key和value变量同名时,可以简写(key即是key也是value变量名)
 */
+/**
+ * 注册接口
+ * @param {*} param0 {username：用户名，password：密码 ，repassword：确认密码}
+ * @returns Promise对象
+ */
 export const registerAPI = ({ username, password, rePassword }) => {
   // 原地是一个promise对象
   // return这个promise对象到逻辑页面，去那边对promise对象提取结果
@@ -47,3 +53,21 @@ export const loginAPI =({username,password})=>{
     },
   })
 }
+
+/**
+ * 获取用户信息接口
+ * @param {*} param0 Authorization
+ * @returns Promise对象
+ */
+export const getUserInfoAPI = (()=>{
+  return request({
+    url:'/my/userinfo',
+    // method不写默认为get
+    method:'get',
+    // 传参给后台：params（查询字符串query），data（请求体body),headers(请求头)
+    headers:{
+      // this.$store.state.token 这里this不是组件对象，不能用this.$store拿到store对象
+      Authorization:store.state.token
+    }
+  })
+})

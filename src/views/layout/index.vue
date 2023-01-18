@@ -68,11 +68,13 @@ export default {
         // 清除vuex
         // 把空字符串传给updateToken
         this.$store.commit('updateToken', '')
+        // 清除用户信息
+        this.$store.commit('updateUserInfo', '')
         // 强制跳转页面
         this.$router.push('/login')
       }
     }
-  }
+  },
 }
 </script>
 

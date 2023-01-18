@@ -7,7 +7,11 @@
 
 <script>
 export default {
-
+  name: 'App',
+  created () {
+    console.log(111);
+    this.$store.dispatch('getUserInfoAction')
+  }
 }
 </script>
 
