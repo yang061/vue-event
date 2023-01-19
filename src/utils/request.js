@@ -2,7 +2,6 @@
 import axios from 'axios'
 import store from '@/store';
 import router from '@/router';
-import { Message } from 'element-ui';
 
 // axios.create() 创建并导出一个带配置的自定义axios函数(比原axios多了个基地址)
 // myAxios请求的时候，地址是baseURL+url,然后去请求后台
@@ -59,7 +58,7 @@ myAxios.interceptors.response.use(function (res) {
     store.commit('updateUserInfo', {})
 
     router.push('/login')
-    Message.error('用户信息已过期')
+    alert('用户信息已过期')
   }
   return Promise.reject(error)
 })

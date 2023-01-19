@@ -104,9 +104,12 @@
       </el-aside>
       <el-container>
         <!-- 页面主体区域 -->
-        <el-main>Main</el-main>
+        <el-main>
+          <!-- 二级路由挂载点 -->
+          <router-view></router-view>
+        </el-main>
         <!-- 底部 footer 区域 -->
-        <el-footer>Footer</el-footer>
+        <el-footer>文章后台管理系统@888888</el-footer>
       </el-container>
     </el-container>
   </el-container>
@@ -223,8 +226,8 @@ export default {
   }
 
   .el-main {
-    overflow-y: scroll;
-    height: 0;
+    overflow-y: hidden;
+    height: 100%;
     background-color: #f2f2f2;
   }
 }

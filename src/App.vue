@@ -12,9 +12,6 @@ export default {
 </script>
 
 <style lang="less">
-div {
-  height: 100%;
-}
 // 修改elementUI 中message组件的样式
 .myBox {
   max-height: 50px !important;

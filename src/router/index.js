@@ -6,8 +6,16 @@ Vue.use(VueRouter)
 const routes = [
   {
     //打开默认看到布局页
-    path: '/',
-    component: () => import('@/views/layout/index')
+    path: '/', //网页打开第一次就是'/'
+    redirect: '/home',
+    component: () => import('@/views/layout/index'),
+    children: [{
+      // 侧边栏导航，点击会切换路由地址，路由地址靠数据请求铺设回来的
+      // 所以路由规则要配合它保持一致
+      // 主页的路由
+      path: 'home',
+      component: () => import('@/views/home')
+    }]
   },
   {
     // 注册的路由配置
@@ -23,7 +31,7 @@ const routes = [
     path: '/login',
     // 文件夹默认找index
     component: () => import('@/views/login')
-  }
+  },
 ]
 
 const router = new VueRouter({

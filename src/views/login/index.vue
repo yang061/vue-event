@@ -80,7 +80,6 @@ export default {
       this.$refs.loginForm.validate(async valid => {
         if (valid) {
           // 拿到关联的数据
-          console.log(this.loginForm);
           // 调用loginAPI,解构赋值data并重命名为res
           const { data: res } = await loginAPI(this.loginForm)
           // 根据后台返回的信息做判断,给用户提示
