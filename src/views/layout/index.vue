@@ -59,9 +59,10 @@
             如果无嵌套，直接写el-menu-item
 
             属性没有显示传值，默认为true(背)
+             :default-active="$route.path",设置点击的高亮
          -->
         <el-menu
-          default-active="/home"
+          :default-active="$route.path"
           class="el-menu-vertical-demo"
           @open="handleOpen"
           @close="handleClose"

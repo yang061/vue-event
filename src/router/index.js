@@ -15,7 +15,13 @@ const routes = [
       // 主页的路由
       path: 'home',
       component: () => import('@/views/home')
-    }]
+    },
+    {
+      // 个人中心->基本资料
+      path: 'user-info',
+      component: () => import('@/views/user/userInfo')
+    }
+    ]
   },
   {
     // 注册的路由配置
@@ -32,6 +38,7 @@ const routes = [
     // 文件夹默认找index
     component: () => import('@/views/login')
   },
+
 ]
 
 const router = new VueRouter({
