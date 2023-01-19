@@ -20,6 +20,11 @@ const routes = [
       // 个人中心->基本资料
       path: 'user-info',
       component: () => import('@/views/user/userInfo')
+    },
+    {
+      // 个人中心->用户头像
+      path: 'user-avatar',
+      component: () => import('@/views/user/userAvatar')
     }
     ]
   },
