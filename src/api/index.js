@@ -76,3 +76,20 @@ export const getMenuAPI = (() => {
     url: '/my/menus',
   })
 })
+
+/**
+ * 更新用户-基本资料
+ * @param {*} param0  { id, nickname：昵称, email：邮箱 }
+ * @returns promise对象
+ */
+export const updateUserInfoAPI = (({ id, nickname, email }) => {
+  return request({
+    url: '/my/userinfo',
+    method: 'put',
+    data: {
+      id,
+      nickname,
+      email
+    }
+  })
+})

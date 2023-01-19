@@ -6,7 +6,7 @@
     <el-form
       :model="userInfo"
       :rules="userInfoRules"
-      ref="userFormRef"
+      ref="userInfoRef"
       label-width="100px"
     >
       <el-form-item label="登录名称" prop="username">
@@ -21,13 +21,14 @@
       <el-form-item>
         <!-- primary主要按钮 -->
         <el-button type="primary" @click="submitFn">提交修改</el-button>
-        <el-button>重置</el-button>
+        <el-button @click="resetFn">重置</el-button>
       </el-form-item>
     </el-form>
   </el-card>
 </template>
 
 <script>
+import { updateUserInfoAPI } from '@/api'
 export default {
   name: 'user-info', //个人中心->基本信息
   data () {
@@ -35,7 +36,7 @@ export default {
       userInfo: {
         username: this.$store.state.userInfo.username, // 默认值用登录后获取到的用户名
         nickname: '',
-        email: ''
+        email: '',
       },
       //   用户详情验证规则
       userInfoRules: {
@@ -58,8 +59,33 @@ export default {
     }
   },
   methods: {
+    // 提交修改->点击事件
     submitFn () {
+      // js兜底验证
+      this.$refs.userInfoRef.validate(async valid => {
+        if (valid) {
+          // 所有的都通过校验
+          //   因为后端接口需要id属性，但userInfo里面没有
+          //   所有加一个id属性
+          this.userInfo.id = this.$store.state.userInfo.id
+          const { data: res } = await updateUserInfoAPI(this.userInfo)
+          if (res.code !== 0) return this.$message.error('更新用户信息失败！！！')
+          //  更新数据成功，刷新vuex里面的数据
+          this.$message.success('更新数据成功！！！')
+          this.$store.dispatch('getUserInfoAction')
 
+        } else {
+          // 未通过校验
+          return false
+        }
+      })
+    },
+    resetFn () {
+      //   this.userInfo.nickname = ''
+      //   this.userInfo.email = ''
+
+      // el-form 提供了一个重置表单（还能重置报错提示）的方法
+      this.$refs.userInfoRef.resetFields()
     }
   }
 }

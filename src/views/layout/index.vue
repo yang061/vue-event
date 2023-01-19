@@ -43,7 +43,7 @@
           <img v-if="user_pic" :src="user_pic" alt="" />
           <!-- 用户头像默认显示 -->
           <img v-else src="@/assets/images/logo.png" alt="" />
-          <span>欢迎 {{ username || nickname }}</span>
+          <span>欢迎 {{ nickname || username }}</span>
         </div>
         <!-- 侧边栏导航 -->
         <!-- 
