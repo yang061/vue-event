@@ -100,4 +100,9 @@ export default {
 .el-button {
   margin-top: 10px;
 }
+.the_img {
+  width: 350px;
+  height: 350px;
+  object-fit: cover;
+}
 </style>

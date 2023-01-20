@@ -64,8 +64,6 @@
         <el-menu
           :default-active="$route.path"
           class="el-menu-vertical-demo"
-          @open="handleOpen"
-          @close="handleClose"
           background-color="#23262E"
           text-color="#fff"
           active-text-color="#409EFF"
@@ -150,12 +148,12 @@ export default {
       }
     },
     // el-menu回调
-    handleOpen (key, keyPath) {
-      console.log(key, keyPath);
-    },
-    handleClose (key, keyPath) {
-      console.log(key, keyPath);
-    },
+    // handleOpen (key, keyPath) {
+    //   console.log(key, keyPath);
+    // },
+    // handleClose (key, keyPath) {
+    //   console.log(key, keyPath);
+    // },
     async getMenuListFn () {
       const { data: res } = await getMenuAPI()
       this.menus = res.data

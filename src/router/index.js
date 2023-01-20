@@ -25,6 +25,15 @@ const routes = [
       // 个人中心->用户头像
       path: 'user-avatar',
       component: () => import('@/views/user/userAvatar')
+    },
+    {
+      // 个人中心->重置密码
+      path: 'user-pwd',
+      component: () => import('@/views/user/userPwd')
+    }, {
+      // 文章管理->文章分类
+      path: 'art-cate',
+      component: () => import('@/views/article/artCate.vue')
     }
     ]
   },

@@ -108,3 +108,78 @@ export const updateUserAvatarAPI = (avatar) => {
     }
   })
 }
+
+/**
+ * 更新用户密码
+ * @param {*} param0  { old_Pwd:旧密码, new_Pwd ：新密码, re_pwd :新密码确认}
+ * @returns promise对象
+ */
+export const updatePwdAPI = ({ old_pwd, new_pwd, re_pwd }) => {
+  return request({
+    url: '/my/updatepwd',
+    method: 'patch',
+    data: {
+      old_pwd,
+      new_pwd,
+      re_pwd
+    }
+  })
+}
+
+/**
+ * 获取文章分类
+ * @returns promise对象
+ */
+export const getArticleListAPI = () => {
+  return request({
+    url: '/my/cate/list'
+  })
+}
+
+/**
+ * 增加文章分类列表接口
+ * @param {*} param0 { cate_name：分类名字, cate_alias：分类别名 }
+ * @returns promise对象
+ */
+export const addArtCateAPI = ({ cate_name, cate_alias }) => {
+  return request({
+    url: '/my/cate/add',
+    method: 'post',
+    data: {
+      cate_name,
+      cate_alias
+    }
+  })
+}
+
+/**
+ * 修改文章分类接口
+ * @param {*} param0 { id:文章分类id, cate_name：文章分类名字, cate_alias：文章分类别名 }
+ * @returns promise对象
+ */
+export const updateArtCateAPI = ({ id, cate_name, cate_alias }) => {
+  return request({
+    url: '/my/cate/info',
+    method: 'put',
+    data: {
+      id,
+      cate_name,
+      cate_alias
+    }
+  })
+}
+
+/**
+ * 删除文章分类的接口
+ * @param {*} param0 id：文章分类id
+ * @returns promise对象
+ */
+export const deleteArtCateAPI = ({ id }) => {
+  return request({
+    url: '/my/cate/del',
+    method: 'delete',
+    params: {
+      id
+    }
+  })
+}
