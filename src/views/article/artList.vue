@@ -74,15 +74,16 @@
             <el-option
               v-for="obj in cateList"
               :label="obj.cate_name"
-              :value="obj.cate_id"
+              :value="obj.id"
               :key="obj.id"
             ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="文章内容" prop="content">
-          <quill-editor v-model="pubForm.content"> </quill-editor>
+          <quill-editor v-model="pubForm.content" @change="contentChangeFn">
+          </quill-editor>
         </el-form-item>
-        <el-form-item label="文章封面">
+        <el-form-item label="文章封面" prop="cover_img">
           <img
             src="@/assets/images/cover.jpg"
             alt=""
@@ -101,8 +102,12 @@
           <el-button type="text" @click="chooseCoverFn"> 选择封面 </el-button>
           <br />
 
-          <el-button type="primary">发布</el-button>
-          <el-button type="info">存为草稿</el-button>
+          <el-button type="primary" @click="pubArticleFn('已发布')"
+            >发布</el-button
+          >
+          <el-button type="info" @click="pubArticleFn('草稿')"
+            >存为草稿</el-button
+          >
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -111,7 +116,13 @@
   
   <script>
 import { getArticleListAPI } from '@/api'
-// 标签和样式中，引入的图片可以写路径，但是在js代码中需要import引入
+// 标签和样式中，引入的图片可以写静态路径(把路径存在vue变量中，再使用是不行的)
+// 原因：webpack在分析标签时，如果src的属性是一个相对路径，那它回去帮我们找到相对路径的值一起打包
+//在打包的时候会分析文件的大小，小文件->base64字符串再赋给src，大文件->拷贝图片，然后换个路径给src显示
+
+//在vue变量中路径，赋予给标签都会当成普通字符串使用
+
+//，但是在js代码中需要import引入
 // webpack会把图片变成一个64位字符串/在打包后的临时地址
 // import ImgSrc from "@/assets/images/cover.jpg"
 export default {
@@ -131,17 +142,29 @@ export default {
         title: '', //文章标题
         cate_id: '', //文章分类id
         content: '', //文章内容
-        cover_img: '' //封面图片(文件)
+        cover_img: '', //封面图片(文件)，
+        state: '' //发布状态{已发布，草稿}
       },
       pubFormRules: { // 表单的验证规则对象
         title: [
           { required: true, message: '请输入文章标题', trigger: 'blur' },
           { min: 1, max: 30, message: '文章标题的长度为1-30个字符', trigger: 'blur' }
         ],
-        cate_id: [{ required: true, message: '请选择文章标题', trigger: 'blur' }],
+        cate_id: [{ required: true, message: '请选择文章分类', trigger: 'change' }],
+        // content对应的是quill-editor富文本编辑器，它不是el提供表单标签
+        // el-input等输入框的在blur事件进行校验
+        // 下拉菜单，单选框，复选框在change事件上校验
+        // quill-editor 2个事件都没有，所以你输入内容也不会走校验
+        // 解决方案：自己给quill-editor绑定change事件
+        // 在事件处理函数中用el-form组件对象，调用某个校验规则再重新执行
         content: [
           {
-            required: true, message: '请输入文章内容', trigger: 'blur'
+            required: true, message: '请输入文章内容', trigger: 'change'
+          }
+        ],
+        cover_img: [
+          {
+            required: true, message: '请选择封面', trigger: 'blur'
           }
         ]
       },
@@ -211,8 +234,29 @@ export default {
         // 转换为64为base字符串
         const url = URL.createObjectURL(files[0])
         this.$refs.coverImg.setAttribute('src', url)
-
       }
+      // 让表单单独校验封面的规则
+      this.$refs.pubFormRef.validateField('cover_img')
+    },
+    //表单内(点击发布/存为草稿) ->点击事件->准备调用后端接口
+    pubArticleFn (str) {
+      // str:"已发布/草稿"(后端要求的参数值)
+      this.pubForm.state = str //保存到发布表单对象上
+      console.log(str);
+      // js兜底校验
+      this.$refs.pubFormRef.validate(async valid => {
+        if (valid) {
+          // 通过校验
+          console.log(this.pubForm);
+        } else {
+          return false //阻止按钮默认提交行为
+        }
+      })
+    },
+    // 富文本编辑器内容改变触发此方法
+    contentChangeFn () {
+      // validateField只校验某个表单字段
+      this.$refs.pubFormRef.validateField('content')
     }
   },
 
