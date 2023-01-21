@@ -14,8 +14,13 @@
               placeholder="请选择分类"
               size="small"
             >
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+              <!-- 因为表单要发给后台，所以提前去看看vue代码绑定的数据是什么，需要什么，发现后台需要分类id（cate_id）,提前存好 -->
+              <el-option
+                v-for="obj in cateList"
+                :label="obj.cate_name"
+                :value="obj.cate_id"
+                :key="obj.id"
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="发布状态" style="margin-left: 15px">
@@ -50,12 +55,37 @@
       fullscreen
       :before-close="handleClose"
     >
-      <span>这是一段信息</span>
+      <!-- 发布文章的对话框 -->
+      <el-form
+        :model="pubForm"
+        :rules="pubFormRules"
+        ref="pubFormRef"
+        label-width="100px"
+      >
+        <el-form-item label="文章标题" prop="title">
+          <el-input v-model="pubForm.title" placeholder="请输入标题"></el-input>
+        </el-form-item>
+        <el-form-item label="文章分类" prop="cate_id">
+          <el-select
+            v-model="pubForm.cate_id"
+            placeholder="请选择分类"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="obj in cateList"
+              :label="obj.cate_name"
+              :value="obj.cate_id"
+              :key="obj.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
     </el-dialog>
   </div>
 </template>
   
   <script>
+import { getArticleListAPI } from '@/api'
 export default {
   name: 'art-list',
   data () {
@@ -67,8 +97,25 @@ export default {
         cate_id: '',
         state: ''
       },
-      pubDialogVisible: false // 控制发表文章对话框的显示与隐藏
+      pubDialogVisible: false, // 控制发表文章对话框的显示与隐藏
+      // 发布文章表单的数据
+      pubForm: {
+        title: '',
+        cate_id: '',
+      },
+      pubFormRules: { // 表单的验证规则对象
+        title: [
+          { required: true, message: '请输入文章标题', trigger: 'blur' },
+          { min: 1, max: 30, message: '文章标题的长度为1-30个字符', trigger: 'blur' }
+        ],
+        cate_id: [{ required: true, message: '请选择文章标题', trigger: 'blur' }]
+      },
+      cateList: []  //存储文章分类列表
     }
+  },
+  created () {
+    //请求分类数据
+    this.getArtCateListFn()
   },
   methods: {
     //发布文章-》点击事件(显示dialog对话框)
@@ -96,12 +143,19 @@ export default {
       // 方法1：try{'可能报错的代码'} catch(err){'try括号里面的报错信息'}
       // 方法2：用promise的链式调用，而且在catch里return的非promise拒绝状态的对象值，都会当成成功的结果返回给原地新的promise对象结果
 
-      // 取消了关闭-阻止住, 什么都不干
+      // 取消了关闭-阻止住, 什么都不干，不让下面代码执行
       if (confirmResult === 'cancel') return
       // 确认关闭
       done() //调用才会放行，让对话框关闭
+    },
+    // 获取文章分类列表
+    async getArtCateListFn () {
+      const { data: res } = await getArticleListAPI()
+      this.cateList = res.data
     }
-  }
+  },
+
+
 }
 
 

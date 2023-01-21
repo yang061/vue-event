@@ -127,7 +127,7 @@ export const updatePwdAPI = ({ old_pwd, new_pwd, re_pwd }) => {
 }
 
 /**
- * 获取文章分类
+ * 获取文章分类列表
  * @returns promise对象
  */
 export const getArticleListAPI = () => {
