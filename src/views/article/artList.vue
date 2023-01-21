@@ -82,6 +82,28 @@
         <el-form-item label="文章内容" prop="content">
           <quill-editor v-model="pubForm.content"> </quill-editor>
         </el-form-item>
+        <el-form-item label="文章封面">
+          <img
+            src="@/assets/images/cover.jpg"
+            alt=""
+            class="cover-img"
+            ref="coverImg"
+          />
+
+          <br />
+          <input
+            type="file"
+            style="display: none"
+            accept="image/*"
+            ref="defaultCoverRef"
+            @change="changeCoverFn"
+          />
+          <el-button type="text" @click="chooseCoverFn"> 选择封面 </el-button>
+          <br />
+
+          <el-button type="primary">发布</el-button>
+          <el-button type="info">存为草稿</el-button>
+        </el-form-item>
       </el-form>
     </el-dialog>
   </div>
@@ -89,6 +111,9 @@
   
   <script>
 import { getArticleListAPI } from '@/api'
+// 标签和样式中，引入的图片可以写路径，但是在js代码中需要import引入
+// webpack会把图片变成一个64位字符串/在打包后的临时地址
+// import ImgSrc from "@/assets/images/cover.jpg"
 export default {
   name: 'art-list',
   data () {
@@ -106,6 +131,7 @@ export default {
         title: '', //文章标题
         cate_id: '', //文章分类id
         content: '', //文章内容
+        cover_img: '' //封面图片(文件)
       },
       pubFormRules: { // 表单的验证规则对象
         title: [
@@ -164,7 +190,29 @@ export default {
       if (res.code === 0) {
         this.cateList = res.data
       }
+    },
+    // 选择封面->点击事件
+    chooseCoverFn () {
+      this.$refs.defaultCoverRef.click() //模拟默认点击
+    },
+    // 用户选择了封面文件
+    changeCoverFn (e) {
+      //e.target 当前选择的表单标签
+      const files = e.target.files //获取文件选择的列表
+      if (files.length === 0) {
+        // 清空cover_img的值,img显示为默认头像
+        this.pubForm.cover_img = null
+        // 取消时显示默认图片(不写更合理一点)
+        // this.$refs.coverImg.setAttribute('src', ImgSrc)
+      } else {
+        // 用户选择了封面
+        this.pubForm.cover_img = files[0]
+        // 封面预览，把图片文件显示到img标签里面
+        // 转换为64为base字符串
+        const url = URL.createObjectURL(files[0])
+        this.$refs.coverImg.setAttribute('src', url)
 
+      }
     }
   },
 
@@ -184,7 +232,11 @@ export default {
     margin-top: 5px;
   }
 }
-
+img.cover-img {
+  width: 400px;
+  height: 300px;
+  object-fit: cover;
+}
 ::v-deep .ql-editor {
   min-height: 300px;
 }
