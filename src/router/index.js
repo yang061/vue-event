@@ -34,6 +34,11 @@ const routes = [
       // 文章管理->文章分类
       path: 'art-cate',
       component: () => import('@/views/article/artCate.vue')
+    },
+    {
+      // 文章管理->文章列表
+      path: 'art-list',
+      component: () => import('@/views/article/artList.vue')
     }
     ]
   },
