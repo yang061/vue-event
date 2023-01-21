@@ -79,6 +79,9 @@
             ></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="文章内容" prop="content">
+          <quill-editor v-model="pubForm.content"> </quill-editor>
+        </el-form-item>
       </el-form>
     </el-dialog>
   </div>
@@ -100,15 +103,21 @@ export default {
       pubDialogVisible: false, // 控制发表文章对话框的显示与隐藏
       // 发布文章表单的数据
       pubForm: {
-        title: '',
-        cate_id: '',
+        title: '', //文章标题
+        cate_id: '', //文章分类id
+        content: '', //文章内容
       },
       pubFormRules: { // 表单的验证规则对象
         title: [
           { required: true, message: '请输入文章标题', trigger: 'blur' },
           { min: 1, max: 30, message: '文章标题的长度为1-30个字符', trigger: 'blur' }
         ],
-        cate_id: [{ required: true, message: '请选择文章标题', trigger: 'blur' }]
+        cate_id: [{ required: true, message: '请选择文章标题', trigger: 'blur' }],
+        content: [
+          {
+            required: true, message: '请输入文章内容', trigger: 'blur'
+          }
+        ]
       },
       cateList: []  //存储文章分类列表
     }
@@ -151,7 +160,11 @@ export default {
     // 获取文章分类列表
     async getArtCateListFn () {
       const { data: res } = await getArticleListAPI()
-      this.cateList = res.data
+      // 成功-》 存储数据
+      if (res.code === 0) {
+        this.cateList = res.data
+      }
+
     }
   },
 
@@ -170,6 +183,10 @@ export default {
   .btn-pub {
     margin-top: 5px;
   }
+}
+
+::v-deep .ql-editor {
+  min-height: 300px;
 }
 </style>
   
