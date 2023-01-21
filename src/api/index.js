@@ -183,3 +183,17 @@ export const deleteArtCateAPI = ({ id }) => {
     }
   })
 }
+
+
+/**
+ * 上传(发布)文章接口
+ * @param {*} fd FormData表单对象
+ * @returns promise对象
+ */
+export const UploadArticleAPI = (fd) => {
+  return request({
+    url: '/my/article/add',
+    method: 'post',
+    data: fd
+  })
+}

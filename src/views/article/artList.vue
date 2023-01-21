@@ -54,6 +54,7 @@
       :visible.sync="pubDialogVisible"
       fullscreen
       :before-close="handleClose"
+      @close="dialogCloseFn"
     >
       <!-- 发布文章的对话框 -->
       <el-form
@@ -80,7 +81,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="文章内容" prop="content">
-          <quill-editor v-model="pubForm.content" @change="contentChangeFn">
+          <quill-editor v-model="pubForm.content" @blur="contentChangeFn">
           </quill-editor>
         </el-form-item>
         <el-form-item label="文章封面" prop="cover_img">
@@ -115,7 +116,8 @@
 </template>
   
   <script>
-import { getArticleListAPI } from '@/api'
+import imgSrc from "@/assets/images/cover.jpg"
+import { getArticleListAPI, UploadArticleAPI } from '@/api'
 // 标签和样式中，引入的图片可以写静态路径(把路径存在vue变量中，再使用是不行的)
 // 原因：webpack在分析标签时，如果src的属性是一个相对路径，那它回去帮我们找到相对路径的值一起打包
 //在打包的时候会分析文件的大小，小文件->base64字符串再赋给src，大文件->拷贝图片，然后换个路径给src显示
@@ -242,12 +244,26 @@ export default {
     pubArticleFn (str) {
       // str:"已发布/草稿"(后端要求的参数值)
       this.pubForm.state = str //保存到发布表单对象上
-      console.log(str);
+
       // js兜底校验
       this.$refs.pubFormRef.validate(async valid => {
         if (valid) {
           // 通过校验
-          console.log(this.pubForm);
+          let fd = new FormData() //准备一个表单数据对象的容器
+          // fd.append('参数名',值)
+          fd.append('title', this.pubForm.title)
+          fd.append('cate_id', this.pubForm.cate_id)
+          fd.append('cover_img', this.pubForm.cover_img)
+          fd.append('content', this.pubForm.content)
+          fd.append('state', this.pubForm.state)
+          // 调用接口
+          const { data: res } = await UploadArticleAPI(fd)
+          // 发布失败，给用户提示
+          if (res.code !== 0) return this.$message.error(res.message)
+          // 发布草稿，给用户提示
+          this.$message.success(res.message)
+          // 关闭对话框
+          this.pubDialogVisible = false
         } else {
           return false //阻止按钮默认提交行为
         }
@@ -257,6 +273,13 @@ export default {
     contentChangeFn () {
       // validateField只校验某个表单字段
       this.$refs.pubFormRef.validateField('content')
+
+    },
+    // 发布文章->关闭对话框->清空表单
+    dialogCloseFn () {
+      this.$refs.pubFormRef.resetFields()
+      // 我们需要手动给封面标签img设置一个值，因为它没有受到v-model的影响
+      this.$refs.coverImg.setAttribute('src', imgSrc)
     }
   },
 
