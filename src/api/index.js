@@ -197,3 +197,20 @@ export const UploadArticleAPI = (fd) => {
     data: fd
   })
 }
+
+/**
+ * 初始化获取文章列表
+ * @param {*} param0 { pagenum: 当前页码数, pagesize: 当前页条数, cate_id: 文章分类id, state: 文章状态 }
+ * @returns promise对象
+ */
+export const initArticleListAPI = ({ pagenum, pagesize, cate_id, state }) => {
+  return request({
+    url: '/my/article/list',
+    params: {
+      pagenum,
+      pagesize,
+      cate_id,
+      state
+    }
+  })
+}

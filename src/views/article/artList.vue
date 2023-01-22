@@ -45,7 +45,13 @@
       </div>
 
       <!-- 文章表格区域 -->
-
+      <el-table :data="artList" border style="width: 100%">
+        <el-table-column prop="title" label="文章标题"> </el-table-column>
+        <el-table-column prop="cate_name" label="分类"> </el-table-column>
+        <el-table-column prop="pub_date" label="发表时间"> </el-table-column>
+        <el-table-column prop="state" label="状态"> </el-table-column>
+        <el-table-column label="操作"> </el-table-column>
+      </el-table>
       <!-- 分页区域 -->
     </el-card>
     <!-- 发表文章的 Dialog 对话框 -->
@@ -117,7 +123,7 @@
   
   <script>
 import imgSrc from "@/assets/images/cover.jpg"
-import { getArticleListAPI, UploadArticleAPI } from '@/api'
+import { getArticleListAPI, UploadArticleAPI, initArticleListAPI } from '@/api'
 // 标签和样式中，引入的图片可以写静态路径(把路径存在vue变量中，再使用是不行的)
 // 原因：webpack在分析标签时，如果src的属性是一个相对路径，那它回去帮我们找到相对路径的值一起打包
 //在打包的时候会分析文件的大小，小文件->base64字符串再赋给src，大文件->拷贝图片，然后换个路径给src显示
@@ -133,8 +139,8 @@ export default {
     return {
       // 查询参数对象
       q: {
-        pagenum: 1,
-        pagesize: 2,
+        pagenum: 1, //默认那第一页的数据
+        pagesize: 2, //当前页需要几条数据（传给后台，后台就返回几个）
         cate_id: '',
         state: ''
       },
@@ -170,12 +176,16 @@ export default {
           }
         ]
       },
-      cateList: []  //存储文章分类列表
+      cateList: [], //存储文章分类列表
+      artList: [], // 文章的列表数据
+      total: 0 // 总数据条数
     }
   },
   created () {
     //请求分类数据
     this.getArtCateListFn()
+    // 初始化文章列表
+    this.getArtListFn()
   },
   methods: {
     //发布文章-》点击事件(显示dialog对话框)
@@ -184,7 +194,6 @@ export default {
     },
     //发布文章对话框关闭前的回调
     // 注意：自带的3种关闭方式：dialog自带的右上角的x，和按下esc按键，和点击半透明蒙层关闭才会走这里，以及自己设置visible对应变量为false，都会导致关闭前的回调触发
-
     async handleClose (done) {
       // 询问用户是否确认关闭对话框
       const confirmResult = await this.$confirm('此操作将导致文章信息丢失, 是否继续?', '提示', {
@@ -264,6 +273,8 @@ export default {
           this.$message.success(res.message)
           // 关闭对话框
           this.pubDialogVisible = false
+          // 刷新文章列表->再次请求文章列表
+          this.getArtListFn()
         } else {
           return false //阻止按钮默认提交行为
         }
@@ -280,6 +291,14 @@ export default {
       this.$refs.pubFormRef.resetFields()
       // 我们需要手动给封面标签img设置一个值，因为它没有受到v-model的影响
       this.$refs.coverImg.setAttribute('src', imgSrc)
+    },
+    // 获取所有的文章列表
+    async getArtListFn () {
+      const { data: res } = await initArticleListAPI(this.q)
+      // 把获取到的文章列表存取到artList里面(有分页，不是所有数据)
+      this.artList = res.data
+      // 把文章总数保存
+      this.total = res.total
     }
   },
 
