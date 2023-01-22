@@ -58,6 +58,19 @@
         <el-table-column label="操作"> </el-table-column>
       </el-table>
       <!-- 分页区域 -->
+      <!-- size-change	pageSize 页码 改变时会触发
+
+      -->
+      <el-pagination
+        @size-change="handleSizeChangeFn"
+        @current-change="handleCurrentChangeFn"
+        :current-page.sync="q.pagenum"
+        :page-sizes="[2, 3, 5, 10]"
+        :page-size.sync="q.pagesize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+      >
+      </el-pagination>
     </el-card>
     <!-- 发表文章的 Dialog 对话框 -->
     <el-dialog
@@ -304,6 +317,23 @@ export default {
       this.artList = res.data
       // 把文章总数保存
       this.total = res.total
+    },
+    // 分页->每页条数改变触发
+    // 核心思想：根据选择的页面/条数，影响q对象对应的值，再重新请求数据
+    handleSizeChangeFn (sizes) {
+      // sizes：当前需要每页显示的条数
+      // 因为pagination的标签上已经加了.sync,子组件会双向绑定到右侧vue变量上（q对象的pagesize已经改变）
+      // 如果不放心可以再写一遍
+      this.q.pagesize = sizes
+      // 重新请求数据
+      this.getArtListFn()
+    },
+    // 当前页码改变时触发
+    handleCurrentChangeFn (nowPage) {
+      // nowPage:当前要看的第几页，页数
+      this.q.pagenum = nowPage
+      // 重新请求数据
+      this.getArtListFn()
     }
   },
 
