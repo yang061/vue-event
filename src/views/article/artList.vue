@@ -30,8 +30,12 @@
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" size="small">筛选</el-button>
-            <el-button type="info" size="small">重置</el-button>
+            <el-button type="primary" size="small" @click="chooseFn"
+              >筛选</el-button
+            >
+            <el-button type="info" size="small" @click="resetFn"
+              >重置</el-button
+            >
           </el-form-item>
         </el-form>
         <!-- 发表文章的按钮 -->
@@ -46,7 +50,14 @@
 
       <!-- 文章表格区域 -->
       <el-table :data="artList" border style="width: 100%">
-        <el-table-column prop="title" label="文章标题"> </el-table-column>
+        <el-table-column prop="title" label="文章标题">
+          <!-- 组件内绑定的点击事件是自定义事件， .native(给根标签绑定一个原生的事件) ，发现都不行，改用插槽  -->
+          <template v-slot="scope">
+            <el-link type="primary" @click="showDetailFn(scope.row.id)">{{
+              scope.row.title
+            }}</el-link>
+          </template>
+        </el-table-column>
         <el-table-column prop="cate_name" label="分类"> </el-table-column>
         <el-table-column prop="pub_date" label="发表时间">
           <!-- 作用域插槽 -->
@@ -55,7 +66,21 @@
           </template>
         </el-table-column>
         <el-table-column prop="state" label="状态"> </el-table-column>
-        <el-table-column label="操作"> </el-table-column>
+        <el-table-column label="操作">
+          <!-- 
+            scope变量值：{
+              row：行数据对象
+            }
+           -->
+          <template v-slot="{ row }">
+            <el-button type="primary" size="mini" @click="changeArtFn(row)"
+              >修改</el-button
+            >
+            <el-button type="danger" size="mini" @click="deleteArtFn(row.id)"
+              >删除</el-button
+            >
+          </template>
+        </el-table-column>
       </el-table>
       <!-- 分页区域 -->
       <!-- size-change	pageSize 页码 改变时会触发
@@ -136,12 +161,37 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+
+    <!-- 查看文章详情对话框 -->
+    <!-- 查看文章详情的对话框 -->
+    <el-dialog title="文章预览" :visible.sync="detailVisible" width="80%">
+      <h1 class="title">{{ artDetail.title }}</h1>
+
+      <div class="info">
+        <span>作者：{{ artDetail.nickname || artDetail.username }}</span>
+        <span>发布时间：{{ $formatDate(artDetail.pub_date) }}</span>
+        <span>所属分类：{{ artDetail.cate_name }}</span>
+        <span>状态：{{ artDetail.state }}</span>
+      </div>
+
+      <!-- 分割线 -->
+      <el-divider></el-divider>
+
+      <!-- 文章的封面 -->
+      <!-- 封面没有前缀 -->
+      <img :src="baseURL + artDetail.cover_img" alt="" />
+
+      <!-- 文章的详情 -->
+      <!-- 用插值语法会转换为字符串，所以用v-html -->
+      <div v-html="artDetail.content" class="detail-box"></div>
+    </el-dialog>
   </div>
 </template>
   
   <script>
 import imgSrc from "@/assets/images/cover.jpg"
-import { getArticleListAPI, UploadArticleAPI, initArticleListAPI } from '@/api'
+import { baseURL } from "@/utils/request.js"
+import { getArticleListAPI, UploadArticleAPI, initArticleListAPI, getArtDetailAPI, deleteArtAPI } from '@/api'
 // 标签和样式中，引入的图片可以写静态路径(把路径存在vue变量中，再使用是不行的)
 // 原因：webpack在分析标签时，如果src的属性是一个相对路径，那它回去帮我们找到相对路径的值一起打包
 //在打包的时候会分析文件的大小，小文件->base64字符串再赋给src，大文件->拷贝图片，然后换个路径给src显示
@@ -195,8 +245,11 @@ export default {
         ]
       },
       cateList: [], //存储文章分类列表
-      artList: [], // 文章的列表数据
-      total: 0 // 总数据条数
+      artList: [], // 当前页文章的列表数据
+      total: 0,// 总数据条数
+      detailVisible: false, //控制文章详情对话框显示
+      artDetail: {}, //保存文章详情
+      baseURL: baseURL, //图片文件基地址
     }
   },
   created () {
@@ -325,6 +378,15 @@ export default {
       // 因为pagination的标签上已经加了.sync,子组件会双向绑定到右侧vue变量上（q对象的pagesize已经改变）
       // 如果不放心可以再写一遍
       this.q.pagesize = sizes
+
+      // BUG 先点击最后一个页码，切换每页显示条数2->3，总数不够，分页只能分到2
+      //每页条数改变了，页码从3到2，两个事件都会触发
+      //偶发性的bug，有的时候会回到第二页有数据，有时没有
+      //知识点：2个网络请求一起出发，谁先回来不一定，
+      //所以可能第二页3条数据回来有值铺设，紧接着第三页 的数据回来了，空数组所以页面是空的
+      //解决：当切换每页显示的条数是，我们把当前页码设置为1，而且标签里面要设置
+      //不让他们同时显示请求
+      this.q.pagenum = 1
       // 重新请求数据
       this.getArtListFn()
     },
@@ -334,6 +396,68 @@ export default {
       this.q.pagenum = nowPage
       // 重新请求数据
       this.getArtListFn()
+    },
+    // 筛选按钮->点击事件
+    chooseFn () {
+      // 有了筛选的条件，让页码回归1，条数回归2
+      this.q.pagenum = 1
+      this.q.pagesize = 2
+      //重新请求
+      this.getArtListFn()
+    },
+    //重置按钮->点击事件
+    resetFn () {
+      this.q = {
+        pagenum: 1,
+        pagesize: 2,
+        cate_id: '',
+        state: ''
+      }
+      // 重新请求数据
+      this.getArtListFn()
+    },
+    // 点击标题-》显示文章详情
+    async showDetailFn (artId) {
+      const { data: res } = await getArtDetailAPI(artId)
+      this.artDetail = res.data
+      this.detailVisible = true
+    },
+    //删除按钮->点击事件
+    async deleteArtFn (id) {
+      // 弹框提醒
+      // confirmResult，用户选择确认，返回confirm；用户选择取消，返回cancel
+      const confirmResult = await this.$confirm('此操作将永久删除该文件, 是否继续?', '提醒', {
+        confirmButtonText: '确定', //操作按钮名称
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).catch(err => err) //返回错误信息
+      // 用户选择确认
+      if (confirmResult === 'confirm') {
+        // 发送请求
+        const { data: res } = await deleteArtAPI(id)
+        if (res.code !== 0) return this.$message.error("删除失败！")
+        this.$message.success("删除成功！")
+        // 重新渲染页面,更新文章列表
+        this.getArtListFn()
+        // 当前页只有一个数据（最后一条）
+        // 1的原因：虽然掉接口删除了数据，但此时页面没有更新，还有一条数据
+        if (this.artList.length === 1) {
+          if (this.q.pagenum > 1) { //当前页数大于1才执行减一操作，防止页码变为0
+            //页码-1
+            this.q.pagenum--
+          }
+        }
+        // BUG bug最后一页删除最后一条时，虽然页码能回到上一页，但是数据没有出现
+        // 原因：发现network里参数q.pagenum不会自己回到上一页，因为你的代码里没有修改过这个q.pagenum值，只是调用了getArtListFn方法，带着之前的参数请求去了
+        // 解决：在调用接口以后，刷新页码之前，对页码数据做一下处理
+      } else {
+        return //选择取消，终止代码
+      }
+    },
+    // 修改文章->点击事件
+    changeArtFn (row) {
+      this.showPubDialogFn()
+      console.log(row);
     }
   },
 
@@ -360,6 +484,22 @@ img.cover-img {
 }
 ::v-deep .ql-editor {
   min-height: 300px;
+}
+.title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: normal;
+  color: #000;
+  margin: 0 0 10px 0;
+}
+.info {
+  display: flex;
+  justify-content: space-between;
+}
+::v-deep .detail-box {
+  img {
+    width: 500px;
+  }
 }
 </style>
   

@@ -214,3 +214,32 @@ export const initArticleListAPI = ({ pagenum, pagesize, cate_id, state }) => {
     }
   })
 }
+
+/**
+ * 获取文章详情
+ * @param {*} id ：文章id
+ * @returns promise对象
+ */
+export const getArtDetailAPI = (id) => {
+  return request({
+    url: '/my/article/info',
+    params: {
+      id
+    }
+  })
+}
+
+/**
+ * 删除文章接口
+ * @param {*} id 文章id
+ * @returns promise对象
+ */
+export const deleteArtAPI = (id) => {
+  return request({
+    url: '/my/article/info',
+    method: 'delete',
+    params: {
+      id
+    }
+  })
+}

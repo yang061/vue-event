@@ -3,11 +3,13 @@ import axios from 'axios'
 import store from '@/store';
 import router from '@/router';
 
+// 定义请求基地址
+export const baseURL = "http://big-event-vue-api-t.itheima.net"
 // axios.create() 创建并导出一个带配置的自定义axios函数(比原axios多了个基地址)
 // myAxios请求的时候，地址是baseURL+url,然后去请求后台
 const myAxios = axios.create({
   // 设置基地址
-  baseURL: 'http://big-event-vue-api-t.itheima.net'
+  baseURL
 })
 
 // 定义请求拦截器
@@ -63,4 +65,7 @@ myAxios.interceptors.response.use(function (res) {
   return Promise.reject(error)
 })
 
+
 export default myAxios
+
+
