@@ -12,20 +12,22 @@
         background-color="#23262e"
         text-color="#fff"
         active-text-color="#409EFF"
+        router
       >
         <el-submenu index="1">
           <template slot="title">
             <!-- 头像 -->
-            <img src="../../assets/images/tx.jpg" alt="" class="pic" />
+            <img v-if="user_pic" :src="user_pic" alt="" class="pic" />
+            <img v-else src="@/assets/images/logo.png" alt="" class="pic" />
             <span>个人中心</span>
           </template>
-          <el-menu-item index="1-1"
+          <el-menu-item index="user-info"
             ><i class="el-icon-s-operation"></i>基本资料</el-menu-item
           >
-          <el-menu-item index="1-2"
+          <el-menu-item index="user-avatar"
             ><i class="el-icon-camera"></i>更换头像</el-menu-item
           >
-          <el-menu-item index="1-3"
+          <el-menu-item index="user-pwd"
             ><i class="el-icon-key"></i>重置密码</el-menu-item
           >
         </el-submenu>
@@ -233,13 +235,13 @@ export default {
 // 头像样式
 .pic {
   position: absolute;
-  right: 120px;
-  //   top: 0;
+  right: 110px;
+  top: 7px;
 
   // 设为圆形
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  width: 45px;
+  height: 45px !important;
   background-color: #fff;
   //   防止挤压变形
   object-fit: cover;

@@ -73,9 +73,6 @@
             }
            -->
           <template v-slot="{ row }">
-            <el-button type="primary" size="mini" @click="changeArtFn(row)"
-              >修改</el-button
-            >
             <el-button type="danger" size="mini" @click="deleteArtFn(row.id)"
               >删除</el-button
             >
@@ -134,11 +131,12 @@
           </quill-editor>
         </el-form-item>
         <el-form-item label="文章封面" prop="cover_img">
+          <!-- 用来显示封面的图片 -->
           <img
-            src="@/assets/images/cover.jpg"
+            src="../../assets/images/cover.jpg"
             alt=""
             class="cover-img"
-            ref="coverImg"
+            ref="imgRef"
           />
 
           <br />
@@ -204,6 +202,7 @@ import { getArticleListAPI, UploadArticleAPI, initArticleListAPI, getArtDetailAP
 export default {
   name: 'art-list',
   data () {
+
     return {
       // 查询参数对象
       q: {
@@ -241,7 +240,7 @@ export default {
         cover_img: [
           {
             required: true, message: '请选择封面', trigger: 'blur'
-          }
+          },
         ]
       },
       cateList: [], //存储文章分类列表
@@ -267,7 +266,7 @@ export default {
     // 注意：自带的3种关闭方式：dialog自带的右上角的x，和按下esc按键，和点击半透明蒙层关闭才会走这里，以及自己设置visible对应变量为false，都会导致关闭前的回调触发
     async handleClose (done) {
       // 询问用户是否确认关闭对话框
-      const confirmResult = await this.$confirm('此操作将导致文章信息丢失, 是否继续?', '提示', {
+      const confirmResult = await this.$confirm('此操作将导致文章信息丢失, 是否继续??', '提示', {
         // 按钮上的文案
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -311,11 +310,20 @@ export default {
         // this.$refs.coverImg.setAttribute('src', ImgSrc)
       } else {
         // 用户选择了封面
-        this.pubForm.cover_img = files[0]
+        // this.pubForm.cover_img = files[0]
         // 封面预览，把图片文件显示到img标签里面
-        // 转换为64为base字符串
+        // 转为临时地址
+        this.pubForm.cover_img = files[0]
         const url = URL.createObjectURL(files[0])
-        this.$refs.coverImg.setAttribute('src', url)
+        this.$refs.imgRef.setAttribute('src', url)
+        // 转换为64为base字符串
+        // const fr = new FileReader()
+        // fr.readAsDataURL(files[0])
+        // fr.onload = (e) => {
+        //   // console.log(e.target.result);
+        //   this.pubForm.cover_img = e.target.result
+        // }
+
       }
       // 让表单单独校验封面的规则
       this.$refs.pubFormRef.validateField('cover_img')
@@ -339,11 +347,23 @@ export default {
           // 调用接口
           const { data: res } = await UploadArticleAPI(fd)
           // 发布失败，给用户提示
-          if (res.code !== 0) return this.$message.error(res.message)
-          // 发布草稿，给用户提示
-          this.$message.success(res.message)
+          if (res.code !== 0) {
+            if (this.pubForm.state === '草稿') {
+              return this.$message.error(`存为草稿失败！！`)
+            } else {
+              return this.$message.error(`发布文章失败！！`)
+            }
+          } else {
+            //发布成功，给用户提示
+            if (this.pubForm.state === '已发布') {
+              this.$message.success(`发布文章成功！！`)
+            } else {
+              this.$message.success('存为草稿成功！！')
+            }
+          }
           // 关闭对话框
           this.pubDialogVisible = false
+          this.$refs.imgRef.setAttribute('src', imgSrc)
           // 刷新文章列表->再次请求文章列表
           this.getArtListFn()
         } else {
@@ -454,11 +474,9 @@ export default {
         return //选择取消，终止代码
       }
     },
-    // 修改文章->点击事件
-    changeArtFn (row) {
-      this.showPubDialogFn()
-      console.log(row);
-    }
+
+
+
   },
 
 
